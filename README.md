@@ -1,2 +1,4 @@
-# Syracuse-Final-Portfolio
-All documents relating to final portofio for Syracuse UNiversity MS Applied Data Science
+# Matthew Ryder Final Portfolio  
+SUID#884895956  
+mryder@syr.edu
+
