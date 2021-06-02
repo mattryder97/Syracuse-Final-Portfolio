@@ -1,0 +1,2 @@
+# Hearthstone Battlegrounds Database
+
