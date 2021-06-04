@@ -1,0 +1,172 @@
+---
+title: "IST 707 Final Project"
+author: "Matt Ryder"
+date: "3/26/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(randomForest)
+library(caret)
+library(class)
+library(e1071)
+```
+
+## The Project
+
+The goal of this project is to utilize the classification tools learned in this class to develop algorithms which can predict whether someone has a high chance of heart disease or not.  
+
+## The Data
+The dataset was obtain from Kaggle and can be found at:
+  https://www.kaggle.com/nareshbhat/health-care-data-set-on-heart-attack-possibility
+  
+The dataset contains the following attributes:
+  1) age
+  2) sex
+  3) chest pain type (4 values)
+  4) resting blood pressure
+  5) serum cholestoral in mg/dl
+  6)fasting blood sugar > 120 mg/dl
+  7) resting electrocardiographic results (values 0,1,2)
+  8) maximum heart rate achieved
+  9) exercise induced angina
+  10) oldpeak = ST depression induced by exercise relative to rest
+  11)the slope of the peak exercise ST segment
+  12) number of major vessels (0-3) colored by flourosopy
+  13) thal: 0 = normal; 1 = fixed defect; 2 = reversable defect
+  14) target: 0= less chance of heart attack 1= more chance of heart attack
+
+```{r data read in}
+heart = read.csv("D:/Winter 2021/IST 707- Data Analytics/Final/heart.csv")
+```
+
+## Data Preprocessing
+
+After reading the data in to R I will split it into a training set and testing set, using random sampling.  I will also make the "target" variable a factor so that our alogrithms perform classification problems rather than regression.
+
+```{r preproccess}
+set.seed(1)
+
+heart$target = as.factor(heart$target)
+
+train_size = round(nrow(heart)*.8,0)
+test_size = nrow(heart) - train_size
+
+train_index = sample(1:nrow(heart), train_size)
+
+train_data = heart[train_index,]
+test_data = heart[-train_index,]
+```
+
+## Algorithms
+
+First, I will use three different algorithms which we have studied in class.  The first algorithm will be the Random Forest, then k-Nearest Neighbors, and lastly Support Vector Machine.  In addition to those algorithms, I will also utilize the eXtreme Gradient Boosting method within the caret package and compare the results.
+
+#### Random Forest
+
+Train a random forest with 3 different tree value to find an optimal model
+```{r rf train}
+set.seed(1)
+
+rf_500 = randomForest(target~., data = train_data, ntree = 500)
+
+rf_750 = randomForest(target~., data = train_data, ntree = 750)
+
+rf_1000 = randomForest(target~., data = train_data, ntree = 1000)
+```
+
+Test the models
+```{r rf test}
+rf500_pred = predict(rf_500, test_data)
+confusionMatrix(rf500_pred, test_data$target, positive = '1')
+
+rf750_pred = predict(rf_750, test_data)
+confusionMatrix(rf750_pred, test_data$target, positive = '1')
+
+rf1000_pred = predict(rf_1000, test_data)
+confusionMatrix(rf1000_pred, test_data$target, positive = '1')
+```
+
+After reviewing the confusion matrices, both the 1000 tree and 750 tree model performed identically with a 91.8% accuracy
+
+#### kNN
+
+With a test data set of 61 obs I will build the models with only 3 possible k values of 3, 5, and 7
+```{r knn}
+set.seed(1)
+
+knn7 = knn(train_data[,-14], test_data[,-14], train_data$target, k = 7, prob = FALSE)
+
+knn5 = knn(train_data[,-14], test_data[,-14], train_data$target, k = 5, prob = FALSE)
+
+kNN3 = knn(train_data[,-14], test_data[,-14], train_data$target, k = 3, prob = FALSE)
+```
+
+Test the models
+```{r knn test}
+confusionMatrix(knn7, test_data[,14], positive = '1')
+
+confusionMatrix(knn5, test_data[,14], positive = '1')
+
+confusionMatrix(kNN3, test_data[,14], positive = '1')
+```
+
+The best performing model was the 7-neighbor model with an accuracy of 75.41%, due to the high false positive rate and significantly lower accuracy than the random forest models.
+
+#### Support Vector Machine
+
+```{r svm train}
+set.seed(1)
+
+svm_linear = svm(target~., data = train_data, scale = FALSE, kernel = "linear", type = "C")
+
+svm_poly = svm(target~., data = train_data, scale = FALSE, kernel = "polynomial", type = "C")
+
+svm_radial = svm(target~., data = train_data, scale = FALSE, kernel = "radial", type = "C")
+
+svm_sigmoid = svm(target~., data = train_data, scale = FALSE, kernel = "sigmoid", type = "C")
+```
+
+Test the different kernels
+```{r svm test}
+svm_linear_pred = predict(svm_linear, test_data)
+confusionMatrix(rf500_pred, test_data$target, positive = '1')
+
+svm_poly_pred = predict(svm_poly, test_data)
+confusionMatrix(rf750_pred, test_data$target, positive = '1')
+
+svm_radial_pred = predict(svm_radial, test_data)
+confusionMatrix(rf1000_pred, test_data$target, positive = '1')
+
+svm_sigmoid_pred = predict(svm_sigmoid, test_data)
+confusionMatrix(rf1000_pred, test_data$target, positive = '1')
+```
+
+All models except the model with the linear kernel performed identically to the random forest models, so we currently have 5 models which all at current best performance.
+
+#### eXtreme Gradient Boosting
+```{r xgboost train}
+set.seed(1)
+
+xgboost = train(target~., data = train_data, method = "xgbDART")
+```
+
+Test the xgboost model
+```{r xgboost test}
+xgb_predict = predict(xgboost, test_data)
+confusionMatrix(xgb_predict, test_data[,14], positive = '1')
+```
+
+This model had a slightly lower accuracy at 90.16%
+
+#### Summary
+
+After reviewing the different model we have a few different options for what we would choose as the best.  First, if we choose the highest accuracy we stil have several option and would have to retrain  after acquiring additional data to best decide which model we want to utilize.  If I had to put one of the 5 identical models into production based on my data, I would utlize the 750 tree random forest model as it is the least computationally intensive of all the model with a 91.8% accuracy.  You could also choose to focus on accurately predicting positive or negative cases.  In this example, if one model better predicted people who were high risk of heart disease, at a sacrifice to accuracy, that would be preferred so that we can ensure those who need treatment, get the appropraite treatment.  In this case, we do not have a model that better identifies positive cases any more accurately than the models with the highest overall accuracy.
+
+
+## Packages Used
+  - randomForest
+  - e1071
+  - class
+  - caret
