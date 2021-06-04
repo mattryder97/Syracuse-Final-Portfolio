@@ -8,5 +8,5 @@ This is an R Markdown file containing all of the code as well as written report 
 This word documents is a "prettier" output from the RMD file.  This can be opened in Microsoft Word and is the best format for reading the report on the project.
 
 #### heart.csv
-This csv is the data file that was used for this project.  The dataset was download from https://www.kaggle.com/nareshbhat/health-care-data-set-on-heart-attack-possibility and can be viewed in Microsoft Excel.
+This csv is the data file that was used for this project.  The dataset was downloaded from https://www.kaggle.com/nareshbhat/health-care-data-set-on-heart-attack-possibility and can be viewed in Microsoft Excel.
 
