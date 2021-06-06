@@ -1,5 +1,5 @@
 # Heart Disease Prediction  
-This was the final project for IST 707 Data Analytics, completed during the Winter 2021 Term.  
+This was the final project for IST 707 Data Analytics, completed during the Winter 2021 Term with Professor Stephen Wallace.  
 
 #### Final Report 707.rmd
 This is an R Markdown file containing all of the code as well as written report for this project.  This file can be viewed within R or R Studio.
