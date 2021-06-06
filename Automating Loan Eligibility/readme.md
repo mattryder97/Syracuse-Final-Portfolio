@@ -24,3 +24,6 @@ The file was used to develop a prediction model using the ksvm function in the k
 
 #### Project svmPlot.png
 A plot of the predictions produced by the Support Vector Machine model developed in "Project SVM.R". Can be opened by an image viewing or editing application.
+
+#### projectdata.xlsx
+This is the dataset that was used for this project.  Can be opened with Microsoft Excel.
